@@ -148,76 +148,107 @@
 </section>
 
 
-<!-- SCORING -->
+<!-- SCORING (REEMPLAZAR) -->
 <section id="scoring" class="panel container">
   <h2>Mide tu scoring</h2>
 
-  <form id="scoringForm" onsubmit="return false;">
-    <label>Ingresos mensuales (COP)</label>
-    <input type="number" id="ingresos">
+  <form id="scoring-form" onsubmit="return false;">
+    <p>Responde cada criterio según el nivel del productor. El resultado será un puntaje entre <strong>1 y 100</strong>.</p>
 
-    <label>Actividad principal</label>
-    <select id="actividad">
-      <option value="hortalizas">Hortalizas</option>
-      <option value="floricultura">Floricultura</option>
-      <option value="ganaderia">Ganadería</option>
-      <option value="mixto">Mixto</option>
+    <label>1. Activos productivos (herramientas, maquinaria, animales)</label>
+    <select id="activos">
+      <option value="0">Ninguno / muy bajo</option>
+      <option value="0.25">Bajo</option>
+      <option value="0.5">Medio</option>
+      <option value="0.75">Alto</option>
+      <option value="1">Muy alto</option>
     </select>
 
-    <label>Años de actividad</label>
-    <input type="number" id="antiguedad">
+    <label>2. Historial de producción y ventas (regularidad)</label>
+    <select id="historial">
+      <option value="0">Irregular / inexistente</option>
+      <option value="0.25">Poco regular</option>
+      <option value="0.5">Regular</option>
+      <option value="0.75">Frecuente</option>
+      <option value="1">Muy constante</option>
+    </select>
+
+    <label>3. Nivel de endeudamiento actual (en tiendas/agros)</label>
+    <select id="endeudamiento">
+      <option value="1">Ninguno</option>
+      <option value="0.75">Bajo</option>
+      <option value="0.5">Medio</option>
+      <option value="0.25">Alto</option>
+      <option value="0">Muy alto</option>
+    </select>
+
+    <label>4. Antigüedad / relación con proveedores (años)</label>
+    <select id="antiguedad">
+      <option value="0">0 años</option>
+      <option value="0.25">1 año</option>
+      <option value="0.5">2–3 años</option>
+      <option value="0.75">4–6 años</option>
+      <option value="1">7+ años</option>
+    </select>
+
+    <label>5. Comportamiento financiero (pagos a tiempo en tiendas)</label>
+    <select id="comportamiento">
+      <option value="0">Incumplimientos frecuentes</option>
+      <option value="0.25">Algunos retrasos</option>
+      <option value="0.5">Pagos irregulares</option>
+      <option value="0.75">Mayormente puntual</option>
+      <option value="1">Siempre puntual</option>
+    </select>
+
+    <label>6. Datos demográficos / condiciones socioeconómicas (estabilidad)</label>
+    <select id="demograficos">
+      <option value="0">Muy vulnerables</option>
+      <option value="0.25">Vulnerables</option>
+      <option value="0.5">Estables</option>
+      <option value="0.75">Sólidos</option>
+      <option value="1">Muy sólidos</option>
+    </select>
 
     <button class="btn" onclick="calcularScoring()">Calcular scoring</button>
   </form>
 
-  <div id="scoringResult" class="result"></div>
+  <div id="scoring-result" class="result"></div>
 </section>
 
 
-<!-- SIMULADOR -->
+<!-- SIMULADOR (REEMPLAZAR) -->
 <section id="simulador" class="panel container">
-  <h2>Simula tu crédito</h2>
+  <h2>Simula tu crédito (método francés, tasa 5% EA)</h2>
 
-  <form id="simuladorForm" onsubmit="return false;">
+  <form id="simulador-form" onsubmit="return false;">
+    <p>Ingresa el valor a financiar o selecciona un modelo (el valor del modelo rellenará el campo automáticamente).</p>
 
-    <label>Tipo de financiación</label>
-    <select id="tipoFinanciacion">
-      <option value="crowdfunding">Crowdfunding Rural P2P</option>
-      <option value="credito">Crédito productivo</option>
-      <option value="fondos">Fondos colaborativos</option>
-    </select>
+    <label>Ingrese valor a financiar (COP)</label>
+    <input type="number" id="valorFinanciar" placeholder="Ej: 55000000" min="0">
 
-    <label>Modelo de casa</label>
-    <select id="modeloCasa">
-      <option value="60" data-precio="66000000">Casa 60 m² — $66.000.000</option>
-      <option value="58" data-precio="63800000">Casa 58 m² — $63.800.000</option>
-      <option value="53" data-precio="58300000">Casa 53 m² — $58.300.000</option>
-      <option value="39" data-precio="42900000">Casa 39 m² — $42.900.000</option>
-      <option value="41" data-precio="45100000">Casa 41 m² — $45.100.000</option>
-      <option value="50" data-precio="55000000">Casa 50 m² — $55.000.000</option>
+    <label>O selecciona un modelo Woodpecker (rellena el valor arriba)</label>
+    <select id="modeloCasaSelect">
+      <option value="">-- Seleccionar modelo (opcional) --</option>
+      <option data-precio="66000000">Casa 60 m² — $66.000.000</option>
+      <option data-precio="63800000">Casa 58 m² — $63.800.000</option>
+      <option data-precio="58300000">Casa 53 m² — $58.300.000</option>
+      <option data-precio="42900000">Casa 39 m² — $42.900.000</option>
+      <option data-precio="45100000">Casa 41 m² — $45.100.000</option>
+      <option data-precio="55000000">Casa 50 m² — $55.000.000</option>
     </select>
 
     <label>Plazo (meses)</label>
-    <input type="number" id="plazo" value="60">
+    <input type="number" id="plazoMeses" value="60" min="1">
 
-    <label>Tasa anual (%)</label>
-    <input type="number" id="tasa" value="12">
+    <label>Tasa anual (EA). Fija: 5% (no editable)</label>
+    <input type="text" id="tasaEA" value="5% EA" disabled>
 
-    <label>Método de amortización</label>
-    <select id="metodo">
-      <option value="frances">Francés</option>
-      <option value="alemán">Alemán</option>
-      <option value="americano">Americano</option>
-    </select>
-
-    <button class="btn" onclick="simularCredito()">Simular</button>
-
+    <button class="btn" onclick="simularFrances()">Simular</button>
   </form>
 
-  <div id="simuladorResult" class="result"></div>
-
+  <div id="simulador-result" class="result"></div>
+  <div id="amortizacion-table" style="margin-top:10px;"></div>
 </section>
-
 
 <!-- CONTACTO -->
 <section id="contacto" class="panel container">
