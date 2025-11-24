@@ -1,89 +1,110 @@
-/* -------------------------------
-   SIMULADOR DE CRÉDITO
---------------------------------*/
+// ==========================
+//   SCORING CALCULATOR
+// ==========================
 
-document.addEventListener("DOMContentLoaded", () => {
-  
-  const simuladorForm = document.getElementById("simulador-form");
-  const simuladorResultado = document.getElementById("simulador-result");
+function calcularScoring() {
+  const activos = parseFloat(document.getElementById("activos").value);
+  const historial = parseFloat(document.getElementById("historial").value);
+  const endeudamiento = parseFloat(document.getElementById("endeudamiento").value);
+  const antiguedad = parseFloat(document.getElementById("antiguedad").value);
+  const comportamiento = parseFloat(document.getElementById("comportamiento").value);
+  const demograficos = parseFloat(document.getElementById("demograficos").value);
 
-  if (simuladorForm) {
-    simuladorForm.addEventListener("submit", (e) => {
-      e.preventDefault();
+  // Escala 0–1 → 0–100
+  const total = (
+    activos +
+    historial +
+    endeudamiento +
+    antiguedad +
+    comportamiento +
+    demograficos
+  ) / 6 * 100;
 
-      const monto = parseFloat(document.getElementById("monto").value);
-      const plazo = parseInt(document.getElementById("plazo").value);
-      const modalidad = document.getElementById("modalidad").value;
+  const resultado = Math.round(total);
 
-      let tasa;
-      if (modalidad === "p2p") tasa = 0.015;       // 1.5% mensual
-      if (modalidad === "productivo") tasa = 0.012; // 1.2% mensual
-      if (modalidad === "fondo") tasa = 0.010;      // 1% mensual
+  document.getElementById("scoring-result").innerHTML =
+    `<h3>Puntaje final: <strong>${resultado}</strong> / 100</h3>`;
+}
 
-      const interes = monto * tasa * plazo;
-      const total = monto + interes;
-      const cuota = (total / plazo).toFixed(2);
 
-      simuladorResultado.innerHTML = `
-        <h3>Resultado de tu crédito:</h3>
-        <p><strong>Monto solicitado:</strong> $${monto.toLocaleString()}</p>
-        <p><strong>Plazo:</strong> ${plazo} meses</p>
-        <p><strong>Modalidad:</strong> ${modalidad}</p>
-        <hr>
-        <p><strong>Interés total:</strong> $${interes.toLocaleString()}</p>
-        <p><strong>Total a pagar:</strong> $${total.toLocaleString()}</p>
-        <p><strong>Cuota mensual aproximada:</strong> $${cuota.toLocaleString()}</p>
-      `;
-    });
+
+
+// ================================
+//   SIMULADOR — MÉTODO FRANCÉS
+// ================================
+
+// Asignar valor automáticamente según modelo
+document.getElementById("modeloCasaSelect").addEventListener("change", function () {
+  const precio = this.options[this.selectedIndex].dataset.precio;
+  if (precio) {
+    document.getElementById("valorFinanciar").value = precio;
   }
-
-  /* -------------------------------
-     SCORING ALTERNATIVO
-  --------------------------------*/
-
-  const scoringForm = document.getElementById("scoring-form");
-  const scoringResult = document.getElementById("scoring-result");
-
-  if (scoringForm) {
-    scoringForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const ingresos = parseFloat(document.getElementById("ingresos").value);
-      const experiencia = parseInt(document.getElementById("experiencia").value);
-      const reputacion = parseInt(document.getElementById("reputacion").value);
-
-      // Algoritmo simple basado en el Capítulo 3:
-      let score = 0;
-
-      // Ingresos rurales ponderados
-      if (ingresos < 800000) score += 10;
-      else if (ingresos < 1200000) score += 20;
-      else if (ingresos < 2000000) score += 30;
-      else score += 40;
-
-      // Años de experiencia productiva
-      if (experiencia <= 1) score += 10;
-      else if (experiencia <= 3) score += 20;
-      else if (experiencia <= 6) score += 30;
-      else score += 40;
-
-      // Reputación comunitaria
-      score += reputacion;
-
-      // Clasificación final
-      let nivel = "";
-      if (score < 40) nivel = "Riesgo Alto";
-      else if (score < 70) nivel = "Riesgo Medio";
-      else nivel = "Riesgo Bajo";
-
-      scoringResult.innerHTML = `
-        <h3>Resultado de tu scoring:</h3>
-        <p><strong>Puntaje total:</strong> ${score}</p>
-        <p><strong>Nivel de riesgo:</strong> ${nivel}</p>
-        <hr>
-        <p>Este cálculo se basa en ingresos, experiencia productiva y reputación comunitaria, siguiendo el modelo alternativo del Capítulo 3.</p>
-      `;
-    });
-  }
-
 });
+
+
+// Función principal
+function simularFrances() {
+
+  const valor = parseFloat(document.getElementById("valorFinanciar").value);
+  const plazo = parseInt(document.getElementById("plazoMeses").value);
+
+  if (isNaN(valor) || valor <= 0) {
+    alert("Ingrese un valor válido a financiar.");
+    return;
+  }
+
+  if (isNaN(plazo) || plazo <= 0) {
+    alert("Ingrese un plazo válido.");
+    return;
+  }
+
+  // Tasa 5% EA → tasa mensual vencida
+  const tasaEA = 0.05;
+  const tasaMensual = Math.pow(1 + tasaEA, 1 / 12) - 1;
+
+  // Cuota fija del método francés
+  const cuota = valor * (tasaMensual * Math.pow((1 + tasaMensual), plazo)) /
+                (Math.pow((1 + tasaMensual), plazo) - 1);
+
+  // Mostrar resumen
+  document.getElementById("simulador-result").innerHTML = `
+    <h3>Resultados</h3>
+    <p><strong>Cuota mensual:</strong> $${cuota.toFixed(0).toLocaleString("es-CO")}</p>
+    <p><strong>Tasa mensual equivalente:</strong> ${(tasaMensual * 100).toFixed(4)}%</p>
+  `;
+
+  // =============================
+  // TABLA DE AMORTIZACIÓN
+  // =============================
+
+  let saldo = valor;
+  let tablaHTML = `
+    <table border="1" cellpadding="5">
+      <tr>
+        <th>Mes</th>
+        <th>Cuota</th>
+        <th>Interés</th>
+        <th>Abono a capital</th>
+        <th>Saldo</th>
+      </tr>
+  `;
+
+  for (let mes = 1; mes <= plazo; mes++) {
+    const interes = saldo * tasaMensual;
+    const abono = cuota - interes;
+    saldo = saldo - abono;
+
+    tablaHTML += `
+      <tr>
+        <td>${mes}</td>
+        <td>$${cuota.toFixed(0).toLocaleString("es-CO")}</td>
+        <td>$${interes.toFixed(0).toLocaleString("es-CO")}</td>
+        <td>$${abono.toFixed(0).toLocaleString("es-CO")}</td>
+        <td>$${Math.max(saldo, 0).toFixed(0).toLocaleString("es-CO")}</td>
+      </tr>
+    `;
+  }
+
+  tablaHTML += `</table>`;
+  document.getElementById("amortizacion-table").innerHTML = tablaHTML;
+}
